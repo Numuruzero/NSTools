@@ -2,7 +2,8 @@
 // @name        PJ Quotes Script
 // @namespace   jhutt.com
 // @match       https://1206578.app.netsuite.com/app/common/custom/custrecordentry.nl*
-// @version     1.0
+// @downloadURL https://github.com/Numuruzero/NSTools/raw/refs/heads/main/PJGPTools.user.js
+// @version     1.1
 // ==/UserScript==
 
 const url = window.location.href;
@@ -98,20 +99,56 @@ function copyFreightInfo() {
     // return JSON.stringify(freightInfo);
 }
 
-function calcShipDiff() {
+function calcShipDiff(type = "PAvF") {
     const parcelQuote = orderInfo.getElementsByTagName("custrecord_sq_parcel_quote")[0].textContent;
     const freightQuote = orderInfo.getElementsByTagName("custrecord_sq_freight_quote")[0].textContent;
-    const diff = Number(freightQuote) - Number(parcelQuote);
-    if (diff > 0) {
-        // console.log(`Freight is more expensive by $${diff.toFixed(2)}`);
-        return `Freight is $${diff.toFixed(2)} more than Parcel.`;
-    } else if (diff < 0) {
-        // console.log(`Parcel is more expensive by $${(-diff).toFixed(2)}`);
-        return `Parcel is $${(-diff).toFixed(2)} more than Freight.`;
-    } else {
-        // console.log("Parcel and Freight quotes are the same.");
-        return "Parcel and Freight quotes are the same.";
+    const premiumQuote = orderInfo.getElementsByTagName("custrecord_sq_quoted_freight_rates")[0].textContent.replaceAll(/(?:<\/*b>)|(?:<br>)/g, '').match(/Premium, Quoted Rate: (\d+\.\d+)/)?.[1];
+    if (type == "PAvF") {
+        const diff = Number(freightQuote) - Number(parcelQuote);
+        if (diff > 0) {
+            // console.log(`Freight is more expensive by $${diff.toFixed(2)}`);
+            return `Freight is $${diff.toFixed(2)} more than Parcel.`;
+        } else if (diff < 0) {
+            // console.log(`Parcel is more expensive by $${(-diff).toFixed(2)}`);
+            return `Parcel is $${(-diff).toFixed(2)} more than Freight.`;
+        } else {
+            // console.log("Parcel and Freight quotes are the same.");
+            return "Parcel and Freight quotes are the same.";
+        }
     }
+    if (type == "FvPR") {
+        if (!premiumQuote) {
+            return "No Premium Rate found.";
+        }
+        const diff = Number(freightQuote) - Number(premiumQuote);
+        if (diff > 0) {
+            // console.log(`Premium Rate is cheaper by $${diff.toFixed(2)}`);
+            return `Premium Rate is $${diff.toFixed(2)} cheaper than Freight.`;
+        } else if (diff < 0) {
+            // console.log(`Freight is cheaper by $${(-diff).toFixed(2)}`);
+            return `Premium Rate $${(-diff).toFixed(2)} more than Freight.`;
+        } else {
+            // console.log("Freight and Premium Rate quotes are the same.");
+            return "Freight and Premium Rate quotes are the same.";
+        }
+    }
+    if (type == "PAvPR") {
+        if (!premiumQuote) {
+            return "No Premium Rate found.";
+        }
+        const diff = Number(premiumQuote) - Number(parcelQuote);
+        if (diff > 0) {
+            // console.log(`Parcel is more expensive by $${diff.toFixed(2)}`);
+            return `Parcel is $${diff.toFixed(2)} more than Premium Rate.`;
+        } else if (diff < 0) {
+            // console.log(`Premium Rate is more expensive by $${(-diff).toFixed(2)}`);
+            return `Premium Rate is $${(-diff).toFixed(2)} more than Parcel.`;
+        } else {
+            // console.log("Parcel and Premium Rate quotes are the same.");
+            return "Parcel and Premium Rate quotes are the same.";
+        }
+    }
+    return "Invalid type specified.";
 }
 
 function createParcelButton() {
@@ -146,14 +183,29 @@ function createButtons() {
     document.querySelector("#div__body").after(btnCont);
 }
 
-function insertShipDiff() {
-    const diffText = calcShipDiff();
-    const diffTr = document.createElement("tr");
-    diffTr.class = "uir-field-wrapper-cell";
-    diffTr.id = "shipdiff";
-    diffTr.innerHTML = `<td> <div class="uir-field-wrapper uir-long-text" data-nsps-label="Freight Quote Difference" data-nsps-type="field" > <span id="custcustrecord_shipdiff" class="smallgraytextnolink uir-label" data-nsps-type="field_label" ><span id="custrecord_sq_shipquote_notes_fs_lbl" class="uir-label-span smallgraytextnolink" style="" data-nsps-type="label" ><a tabindex="-1" title="What's this?" href='javascript:void("help")' style="cursor: help" class="smallgraytextnolink uir-no-link" onmouseover="setFirstClassName(this, 'smallgraytext'); return true;" onmouseout="setFirstClassName(this, 'smallgraytextnolink'); " >Ship Quote Difference</a > </span></span ><span class="uir-field inputreadonly uir-resizable" data-nsps-type="field_input" data-field-type="textarea" > ${diffText} </span> </div> </td>`;
-    diffTr.style.marginTop = "12px";
-    document.querySelector("#main_form > table > tbody > tr > td > table > tbody > tr > td:nth-child(1) > table > tbody > tr:nth-child(4)").after(diffTr);
+function insertShipDiffs() {
+    const diffPAvFText = calcShipDiff();
+    const diffPAvF = document.createElement("tr");
+    diffPAvF.class = "uir-field-wrapper-cell";
+    diffPAvF.id = "shipdiff";
+    diffPAvF.innerHTML = `<td> <div class="uir-field-wrapper uir-long-text" data-nsps-label="Freight Quote Difference" data-nsps-type="field" > <span id="custcustrecord_shipdiff" class="smallgraytextnolink uir-label" data-nsps-type="field_label" ><span id="custrecord_sq_shipquote_notes_fs_lbl" class="uir-label-span smallgraytextnolink" style="" data-nsps-type="label" ><a tabindex="-1" title="What's this?" href='javascript:void("help")' style="cursor: help" class="smallgraytextnolink uir-no-link" onmouseover="setFirstClassName(this, 'smallgraytext'); return true;" onmouseout="setFirstClassName(this, 'smallgraytextnolink'); " >Ship Quote Difference</a > </span></span ><span class="uir-field inputreadonly uir-resizable" data-nsps-type="field_input" data-field-type="textarea" > ${diffPAvFText} </span> </div> </td>`;
+    diffPAvF.style.marginTop = "12px";
+
+    const diffFvPRText = calcShipDiff("FvPR");
+    const diffFvPR = document.createElement("tr");
+    diffFvPR.class = "uir-field-wrapper-cell";
+    diffFvPR.id = "shipdiff2";
+    diffFvPR.innerHTML = `<td> <div class="uir-field-wrapper uir-long-text" data-nsps-label="Freight vs Premium Rate Difference" data-nsps-type="field" > <span id="custcustrecord_shipdiff2" class="smallgraytextnolink uir-label" data-nsps-type="field_label" ><span id="custrecord_sq_shipquote_notes_fs_lbl" class="uir-label-span smallgraytextnolink" style="" data-nsps-type="label" ><a tabindex="-1" title="What's this?" href='javascript:void("help")' style="cursor: help" class="smallgraytextnolink uir-no-link" onmouseover="setFirstClassName(this, 'smallgraytext'); return true;" onmouseout="setFirstClassName(this, 'smallgraytextnolink'); " >Freight vs Premium Rate Difference</a > </span></span ><span class="uir-field inputreadonly uir-resizable" data-nsps-type="field_input" data-field-type="textarea" > ${diffFvPRText} </span> </div> </td>`;
+
+    const diffPAvPRText = calcShipDiff("PAvPR");
+    const diffPAvPR = document.createElement("tr");
+    diffPAvPR.class = "uir-field-wrapper-cell";
+    diffPAvPR.id = "shipdiff3";
+    diffPAvPR.innerHTML = `<td> <div class="uir-field-wrapper uir-long-text" data-nsps-label="Parcel vs Premium Rate Difference" data-nsps-type="field" > <span id="custcustrecord_shipdiff3" class="smallgraytextnolink uir-label" data-nsps-type="field_label" ><span id="custrecord_sq_shipquote_notes_fs_lbl" class="uir-label-span smallgraytextnolink" style="" data-nsps-type="label" ><a tabindex="-1" title="What's this?" href='javascript:void("help")' style="cursor: help" class="smallgraytextnolink uir-no-link" onmouseover="setFirstClassName(this, 'smallgraytext'); return true;" onmouseout="setFirstClassName(this, 'smallgraytextnolink'); " >Parcel vs Premium Rate Difference</a > </span></span ><span class="uir-field inputreadonly uir-resizable" data-nsps-type="field_input" data-field-type="textarea" > ${diffPAvPRText} </span> </div> </td>`;
+    document.querySelector("#main_form > table > tbody > tr > td > table > tbody > tr > td:nth-child(1) > table > tbody > tr:nth-child(4)").after(diffPAvF);
+    document.querySelector("#shipdiff").after(diffFvPR);
+    document.querySelector("#shipdiff2").after(diffPAvPR);
+
 }
 /////////////////////////////////////End PJ Quote Functions/////////////////////////////////////
 ///////////////////////////////////////Begin GP Functions//////////////////////////////////////
@@ -281,9 +333,9 @@ async function grabXML() {
 
     if (url.includes(pjCheck)) {
         createButtons();
-        copyParcelInfo();
-        copyFreightInfo();
-        insertShipDiff();
+        // copyParcelInfo();
+        // copyFreightInfo();
+        insertShipDiffs();
     }
 
     if (url.includes(gpCheck)) {
