@@ -136,7 +136,7 @@ function calcShipDiff(type = "PAvF") {
         if (!premiumQuote) {
             return "No Premium Rate found.";
         }
-        const diff = Number(premiumQuote) - Number(parcelQuote);
+        const diff = Number(parcelQuote) - Number(premiumQuote);
         if (diff > 0) {
             // console.log(`Parcel is more expensive by $${diff.toFixed(2)}`);
             return `Parcel is $${diff.toFixed(2)} more than Premium Rate.`;
