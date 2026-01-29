@@ -100,10 +100,16 @@ function copyFreightInfo() {
 }
 
 function calcShipDiff(type = "PAvF") {
-    const parcelQuote = orderInfo.getElementsByTagName("custrecord_sq_parcel_quote")[0].textContent;
-    const freightQuote = orderInfo.getElementsByTagName("custrecord_sq_freight_quote")[0].textContent;
+    const parcelQuote = orderInfo.getElementsByTagName("custrecord_sq_parcel_quote")[0]?.textContent;
+    const freightQuote = orderInfo.getElementsByTagName("custrecord_sq_freight_quote")[0]?.textContent;
     const premiumQuote = orderInfo.getElementsByTagName("custrecord_sq_quoted_freight_rates")[0].textContent.replaceAll(/(?:<\/*b>)|(?:<br>)/g, '').match(/Premium, Quoted Rate: (\d+\.\d+)/)?.[1];
     if (type == "PAvF") {
+        if (!parcelQuote) {
+            return "No Parcel Quote found.";
+        }
+        if (!freightQuote) {
+            return "No Freight Quote found.";
+        }
         const diff = Number(freightQuote) - Number(parcelQuote);
         if (diff > 0) {
             // console.log(`Freight is more expensive by $${diff.toFixed(2)}`);
@@ -120,6 +126,9 @@ function calcShipDiff(type = "PAvF") {
         if (!premiumQuote) {
             return "No Premium Rate found.";
         }
+        if (!freightQuote) {
+            return "No Freight Quote found.";
+        }
         const diff = Number(freightQuote) - Number(premiumQuote);
         if (diff > 0) {
             // console.log(`Premium Rate is cheaper by $${diff.toFixed(2)}`);
@@ -135,6 +144,9 @@ function calcShipDiff(type = "PAvF") {
     if (type == "PAvPR") {
         if (!premiumQuote) {
             return "No Premium Rate found.";
+        }
+        if (!parcelQuote) {
+            return "No Parcel Quote found.";
         }
         const diff = Number(parcelQuote) - Number(premiumQuote);
         if (diff > 0) {
