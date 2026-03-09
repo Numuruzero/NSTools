@@ -4,7 +4,7 @@
 // @description A floating menu for NetSuite sales orders to quickly add notes and perform actions.
 // @match       https://1206578.app.netsuite.com/app/accounting/transactions/salesord.nl*
 // @require     https://cdn.jsdelivr.net/npm/@violentmonkey/dom@2
-// @version     1.0
+// @version     1.1
 // ==/UserScript==
 
 const url = window.location.href;
@@ -231,12 +231,6 @@ floatingMenu.innerHTML = `<div id="ticker">0</div>
             id="opfloatcatcstcmtcollapse"
             class="opcollcontent opcollcatcontent"
           >
-            <button class="catbtn" data-note="No-action comment. ">
-              No-action comment
-            </button>
-            <button class="catbtn" data-note="Copying ship note. ">
-              Copying ship note
-            </button>
           </div>
           <button id="opfloatbtncstcmt" class="collcatbtn opcollapsible">
             Customer Comment
@@ -248,12 +242,6 @@ floatingMenu.innerHTML = `<div id="ticker">0</div>
             id="opfloatcatfraudcollapse"
             class="opcollcontent opcollcatcontent"
           >
-            <button
-              class="catbtn"
-              data-note="Low risk score, no review triggered. "
-            >
-              No review triggered
-            </button>
           </div>
           <button id="opfloatbtnfraud" class="collcatbtn opcollapsible">
             Fraud
@@ -265,27 +253,6 @@ floatingMenu.innerHTML = `<div id="ticker">0</div>
             id="opfloatcatlgpcollapse"
             class="opcollcontent opcollcatcontent"
           >
-            <button class="catbtn" data-note="LGP for solo keypad. ">
-              Solo keypad
-            </button>
-            <button class="catbtn" data-note="LGP for solo light item. ">
-              Solo light item
-            </button>
-            <button class="catbtn" data-note="LGP for replacement order. ">
-              Replacement order
-            </button>
-            <button class="catbtn" data-note="LGP for influencer order. ">
-              Influencer order
-            </button>
-            <button class="catbtn" data-note="LGP recalc'd XX%. ">
-              Recalc'd
-            </button>
-            <button class="catbtn" data-note="LGP for known low GP item. ">
-              Known item
-            </button>
-            <button class="catbtn" data-note="LGP for employee order. ">
-              Employee order
-            </button>
           </div>
           <button id="opfloatbtnlgp" class="collcatbtn opcollapsible">
             Low GP
@@ -297,24 +264,6 @@ floatingMenu.innerHTML = `<div id="ticker">0</div>
             id="opfloatcatbulkcollapse"
             class="opcollcontent opcollcatcontent"
           >
-            <button
-              class="catbtn"
-              data-note="Bulk flag: address not residence. "
-            >
-              Not residence
-            </button>
-            <button
-              class="catbtn"
-              data-note="Bulk flag for dog-bone connectors. "
-            >
-              Dog-bones
-            </button>
-            <button class="catbtn" data-note="Bulk flag for multi-part items. ">
-              Multi-part
-            </button>
-            <button class="catbtn" data-note="Bulk flag for wire management. ">
-              Wire management
-            </button>
           </div>
           <button id="opfloatbtnbulk" class="collcatbtn opcollapsible">
             Bulk
@@ -326,12 +275,6 @@ floatingMenu.innerHTML = `<div id="ticker">0</div>
             id="opfloatcatesdcollapse"
             class="opcollcontent opcollcatcontent"
           >
-            <button
-              class="catbtn"
-              data-note="ESD Flag: all items are waiting for transfer. "
-            >
-              All items transferring
-            </button>
           </div>
           <button id="opfloatbtnesd" class="collcatbtn opcollapsible">
             Ship Dates
@@ -343,12 +286,6 @@ floatingMenu.innerHTML = `<div id="ticker">0</div>
             id="opfloatcatmismatchcollapse"
             class="opcollcontent opcollcatcontent"
           >
-            <button
-              class="catbtn"
-              data-note="Mismatch flag: No alternatives available. "
-            >
-              No alternatives
-            </button>
           </div>
           <button id="opfloatbtnmismatch" class="collcatbtn opcollapsible">
             Mismatch
@@ -364,9 +301,43 @@ floatingMenu.innerHTML = `<div id="ticker">0</div>
         </div>
         <button id="notebutton">Add Note</button>
       </div>`;
+// Create the buttons
+function createButton(title, text, cat) {
+  const button = document.createElement("button");
+  button.className = "catbtn";
+  button.textContent = title;
+  button.dataset.note = text;
+  floatingMenu.querySelector(`#opfloatcat${cat}collapse`).appendChild(button);
+  return button;
+}
+// Insert the buttons
+////////// Customer comment buttons \\\\\\\\\\
+createButton("No-action comment", "No-action comment. ", "cstcmt");
+createButton("Copying ship note", "Copying ship note. ", "cstcmt");
+////////// Fraud buttons \\\\\\\\\\
+createButton("No review triggered", "Low risk score, no review triggered. ", "fraud");
+////////// Low GP buttons \\\\\\\\\\
+createButton("Solo keypad", "LGP for solo keypad. ", "lgp");
+createButton("Solo light item", "LGP for solo light item. ", "lgp");
+createButton("Replacement order", "LGP for replacement order. ", "lgp");
+createButton("Influencer order", "LGP for influencer order. ", "lgp");
+createButton("Recalc'd", "LGP recalc'd XX%. ", "lgp");
+createButton("Known item", "LGP for known low GP item. ", "lgp");
+createButton("Employee order", "LGP for employee order. ", "lgp");
+////////// Bulk buttons \\\\\\\\\\
+createButton("Not residence", "Bulk flag: address not residence. ", "bulk");
+createButton("Dog-bones", "Bulk flag for dog-bone connectors. ", "bulk");
+createButton("Multi-part", "Bulk flag for multi-part items. ", "bulk");
+createButton("Wire management", "Bulk flag for wire management. ", "bulk");
+////////// ESD buttons \\\\\\\\\\
+createButton("All items transferring", "ESD Flag: all items are waiting for transfer. ", "esd");
+createButton("Transfer or dates", "ESD Flag: all items are waiting for transfer or have dates. ", "esd");
+////////// Mismatch buttons \\\\\\\\\\
+createButton("No alternatives", "Mismatch flag: No alternatives available. ", "mismatch");
+// Append the actual menu to the body
 document.body.appendChild(floatingMenu);
 
-//////////////////// Append all the actual scripting \\\\\\\\\\\\\\\\\\\\\
+//////////////////// Append all the actual scripting \\\\\\\\\\\\\\\\\\\\\ 
 
 //////////////////// Script to handle the note insert functionality ////////////////////
 function insertNote(el) {
