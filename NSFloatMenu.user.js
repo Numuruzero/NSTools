@@ -4,7 +4,7 @@
 // @description A floating menu for NetSuite sales orders to quickly add notes and perform actions.
 // @match       https://1206578.app.netsuite.com/app/accounting/transactions/salesord.nl*
 // @require     https://cdn.jsdelivr.net/npm/@violentmonkey/dom@2
-// @version     1.1
+// @version     1.2
 // ==/UserScript==
 
 const url = window.location.href;
@@ -236,6 +236,17 @@ floatingMenu.innerHTML = `<div id="ticker">0</div>
             Customer Comment
           </button>
         </div>
+        <!-- Action flag notes -->
+        <div id="opfloatcataction" class="opfloatcat">
+          <div
+            id="opfloatcatactioncollapse"
+            class="opcollcontent opcollcatcontent"
+          >
+          </div>
+          <button id="opfloatbtnaction" class="collcatbtn opcollapsible">
+            Action Flags
+          </button>
+        </div>
         <!-- Fraud-type flag notes -->
         <div id="opfloatcatfraud" class="opfloatcat">
           <div
@@ -314,6 +325,10 @@ function createButton(title, text, cat) {
 ////////// Customer comment buttons \\\\\\\\\\
 createButton("No-action comment", "No-action comment. ", "cstcmt");
 createButton("Copying ship note", "Copying ship note. ", "cstcmt");
+////////// Action flag buttons \\\\\\\\\\
+createButton("Freight looks good", "Freight looks good. ", "action");
+createButton("Requesting LOA", "Requesting LOA. ", "action");
+createButton("Fix address", "Fixing address. ", "action");
 ////////// Fraud buttons \\\\\\\\\\
 createButton("No review triggered", "Low risk score, no review triggered. ", "fraud");
 ////////// Low GP buttons \\\\\\\\\\
