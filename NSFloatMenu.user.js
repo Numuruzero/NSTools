@@ -4,7 +4,7 @@
 // @description A floating menu for NetSuite sales orders to quickly add notes and perform actions.
 // @match       https://1206578.app.netsuite.com/app/accounting/transactions/salesord.nl*
 // @require     https://cdn.jsdelivr.net/npm/@violentmonkey/dom@2
-// @version     1.2
+// @version     1.3
 // ==/UserScript==
 
 const url = window.location.href;
@@ -112,6 +112,22 @@ style.innerHTML = `#opfloatheader {
         height: 200px;
         width: 200px;
         font-style: normal;
+      }
+
+      #submitdiv {
+        display: flex;
+      }
+
+      #notebutton {
+        display: inline-block;
+        width: 70%;
+      }
+
+      #editbutton {
+        display: inline-block;
+        width: 40%;
+        background-color: #1e2bc5;
+        color: #e1e0df;
       }
 
       .opfloatcat {
@@ -310,7 +326,10 @@ floatingMenu.innerHTML = `<div id="ticker">0</div>
           </div>
           <p id="opfloatnotecollapsebutton" class="opcollapsible">&nbsp;></p>
         </div>
-        <button id="notebutton">Add Note</button>
+        <div id="submitdiv">
+          <button id="notebutton">Add Note</button>
+          <button id="editbutton">&Edit</button>
+        </div>
       </div>`;
 // Create the buttons
 function createButton(title, text, cat) {
@@ -501,10 +520,7 @@ function dragElement(elmnt) {
   }
 }
 
-const noteButton = document.querySelector("#notebutton");
-const inputNote = document.querySelector("#opfloatnote");
-const ticker = document.querySelector("#ticker");
-noteButton.addEventListener("click", () => {
+function submitNote(edit = false) {
   const loader = document.querySelector("#opfloatpostnoteloader");
   loader.style.top = "-22px";
   loader.style.opacity = "1"; // Show the loader
@@ -578,6 +594,7 @@ noteButton.addEventListener("click", () => {
           clearInterval(postNote); // Stop the interval once the node is found
           clearInterval(complete);
           document.querySelector("#opfloatnoteiframe").remove();
+          if (edit) document.querySelector("#edit").click(); // TEST control to automatically enter edit mode after note submission
         }
       }, 500);
       //   }
@@ -588,4 +605,11 @@ noteButton.addEventListener("click", () => {
       return true;
     }
   });
-});
+}
+
+const noteButton = document.querySelector("#notebutton");
+const noteEditButton = document.querySelector("#editbutton");
+const inputNote = document.querySelector("#opfloatnote");
+const ticker = document.querySelector("#ticker");
+noteButton.addEventListener("click", () => submitNote());
+noteEditButton.addEventListener("click", () => submitNote(true));
