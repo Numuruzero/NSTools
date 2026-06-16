@@ -4,12 +4,17 @@
 // @description A floating menu for NetSuite sales orders to quickly add notes and perform actions.
 // @match       https://1206578.app.netsuite.com/app/accounting/transactions/salesord.nl*
 // @require     https://cdn.jsdelivr.net/npm/@violentmonkey/dom@2
-// @version     1.3
+// @version     1.4
 // ==/UserScript==
 
 const url = window.location.href;
 const orderID = url.match(/id=(\d+)/)?.[1];
+const isEd = url.includes("e=T"); // Check if the URL indicates we're in edit mode
+const edSave = isEd ? "&Save" : "&Edit"; // Edit if we're not already, save if we are
 
+// IDEA: Instead of trying to trigger the click on the custom dropdown option, we may be able to find the hidden input that the dropdown updates and update that directly then dispatch a change event. This would be more likely to work since it's more similar to how the dropdown actually functions and doesn't rely on the dropdown's click handlers which may not be triggered properly by a synthetic event.
+// REAL IDEA NOT AI: We can also add a mutation observer to watch for changes to the dropdown's options and update our reference to the correct option element as needed, this would help ensure that our script continues to work even if the page structure changes or if the options are dynamically loaded after our script runs.
+// SERIOUSLY REAL IDEA: We can "activate" the comment buttons when clicked, then make them search and remove their comment from the value when they are next clicked and "deactivated"
 //////////////////// Create the floating menu and its components \\\\\\\\\\\\\\\\\\\\\
 //////////////////// Create and insert style node \\\\\\\\\\\\\\\\\\\\\
 const style = document.createElement("style");
@@ -328,7 +333,7 @@ floatingMenu.innerHTML = `<div id="ticker">0</div>
         </div>
         <div id="submitdiv">
           <button id="notebutton">Add Note</button>
-          <button id="editbutton">&Edit</button>
+          <button id="editbutton">${edSave}</button>
         </div>
       </div>`;
 // Create the buttons
@@ -594,7 +599,7 @@ function submitNote(edit = false) {
           clearInterval(postNote); // Stop the interval once the node is found
           clearInterval(complete);
           document.querySelector("#opfloatnoteiframe").remove();
-          if (edit) document.querySelector("#edit").click(); // TEST control to automatically enter edit mode after note submission
+          if (edit) isEd ? document.querySelector("#btn_multibutton_submitter").click() : document.querySelector("#edit").click(); // TEST control to automatically enter edit mode after note submission
         }
       }, 500);
       //   }
