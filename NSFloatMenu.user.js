@@ -526,12 +526,16 @@ function dragElement(elmnt) {
 }
 
 function submitNote(edit = false) {
+  const inputText = inputNote.value.trim();
+  if (inputText === "") {
+    alert("Please enter a note before submitting.");
+    return;
+  }
   const loader = document.querySelector("#opfloatpostnoteloader");
   loader.style.top = "-22px";
   loader.style.opacity = "1"; // Show the loader
   const date = Number(new Date());
   const noteString = `https://1206578.app.netsuite.com/app/crm/common/note.nl?l=T&refresh=usernotes&perm=TRAN_SALESORD&transaction=${orderID}&_ts=${date}`;
-  const inputText = inputNote.value.trim();
   const noteFrame = document.createElement("iframe");
   noteFrame.src = noteString;
   noteFrame.id = "opfloatnoteiframe";
