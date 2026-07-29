@@ -4,7 +4,7 @@
 // @description A floating menu for NetSuite sales orders to quickly add notes and perform actions.
 // @match       https://1206578.app.netsuite.com/app/accounting/transactions/salesord.nl*
 // @require     https://cdn.jsdelivr.net/npm/@violentmonkey/dom@2
-// @version     1.4
+// @version     1.5
 // ==/UserScript==
 
 const url = window.location.href;
@@ -342,6 +342,7 @@ function createButton(title, text, cat) {
   button.className = "catbtn";
   button.textContent = title;
   button.dataset.note = text;
+  button.dataset.set = false; // Custom attribute to track whether the button is active or not
   floatingMenu.querySelector(`#opfloatcat${cat}collapse`).appendChild(button);
   return button;
 }
@@ -382,7 +383,17 @@ document.body.appendChild(floatingMenu);
 function insertNote(el) {
   const note = el.getAttribute("data-note");
   const noteField = document.getElementById("opfloatnote");
-  noteField.value += `${note}`;
+  if (el.getAttribute("data-set") === "true") {
+    // If the button is already set, remove the note from the textarea
+    const currentValue = noteField.value;
+    noteField.value = currentValue.replace(`${note}`, "");
+    el.setAttribute("data-set", "false");
+    el.style.border = "2px solid darkgrey"; // Reset border color to indicate it's inactive
+  } else {
+    noteField.value += `${note}`;
+    el.setAttribute("data-set", "true");
+    el.style.border = "2px solid #1c312a"; // Change border color to indicate it's active
+  }
 }
 const allNoteBtns = document.getElementsByClassName("catbtn");
 console.log(allNoteBtns);
