@@ -91,9 +91,9 @@ function getInfo(obj, reqKey) {
                         }
                         current = infoArray;
                     } else if (current?.[key.slice(1, -1)] !== undefined) {
-                        // If it's not an array, just access it directly
+                        // If it's not an array, stick into an array so it can be accessed by item
                         console.log(`Accessing key: ${key.slice(1, -1)}`);
-                        current = current[key.slice(1, -1)];
+                        current = [current[key.slice(1, -1)]];
                     } else {
                         return "N/A";
                     }
@@ -220,6 +220,27 @@ function moveColumn(fromIndex, toIndex) {
     });
 }
 
+function translateColumn(header, translationJSON) {
+    const table = captureTableCells(tableElement);
+    const headerRow = table[0];
+    let headerIndex = -1;
+    if (isNaN(header)) {
+        headerIndex = headerRow.findIndex((cell) => cell.textContent.toLowerCase().includes(header.toLowerCase()));
+    } else {
+        headerIndex = Number(header) - 1;
+    }
+
+    table.forEach((row, rowIndex) => {
+        const cellToTranslate = row.at(headerIndex);
+        if (cellToTranslate) {
+            const cellText = cellToTranslate.textContent;
+            if (translationJSON[cellText]) {
+                cellToTranslate.textContent = translationJSON[cellText];
+            }
+        }
+    });
+}
+
 const afterEl = document.getElementsByClassName("uir-filters")[0];
 
 const controlDiv = document.createElement("div");
@@ -228,7 +249,7 @@ controlDiv.style.flexDirection = "column";
 controlDiv.style.alignItems = "flex-end";
 controlDiv.style.marginBottom = "10px";
 controlDiv.style.marginRight = "10px";
-controlDiv.innerHTML = `<table><tr><th style="text-align: center" colspan="3">Move Column</th><th>&nbsp;</th><th>&nbsp;</th><th style="text-align: center">URL col#</th><th style="text-align: center">XML tag</th><th style="text-align: center">Header</th><th>&nbsp;</th></tr><tr><td><input id="fromcolumn" type="text" placeholder="From" style="width: 80px" /></td><td>to</td><td><input id="tocolumn" type="text" placeholder="To" style="width: 80px" /></td><td><button id="movecol">Go</button></td><td><button id="lesscol" style="width: 24px">-</button></td><td><input id="urlcolumn" type="text" placeholder="URL column" style="width: 80px" /></td><td><input id="xmltag" type="text" placeholder="XML tag" style="width: 80px" /></td><td><input id="header" type="text" placeholder="Header" style="width: 80px" /></td><td><button id="morecol" style="width: 24px">+</button></td></tr></table>`;
+controlDiv.innerHTML = `<table><tr><th style="text-align: center" colspan="3">Translate Column IDs</th><th>&nbsp;</th><th style="text-align: center" colspan="3">Move Column</th><th>&nbsp;</th><th>&nbsp;</th><th style="text-align: center">URL col#</th><th style="text-align: center">XML tag</th><th style="text-align: center">Header</th><th>&nbsp;</th></tr><tr><td><input id="transcol" type="text" placeholder="Column" style="width: 80px" /></td><td>JSON:</td><td><input id="transjson" type="text" placeholder='{"1":"One","2":"Two"}' style="width: 80px" /></td><td><button id="translatego">Go</button></td><td><input id="fromcolumn" type="text" placeholder="From" style="width: 80px" /></td><td>to</td><td><input id="tocolumn" type="text" placeholder="To" style="width: 80px" /></td><td><button id="movecol">Go</button></td><td><button id="lesscol" style="width: 24px">-</button></td><td><input id="urlcolumn" type="text" placeholder="URL column" style="width: 80px" /></td><td><input id="xmltag" type="text" placeholder="XML tag" style="width: 80px" /></td><td><input id="header" type="text" placeholder="Header" style="width: 80px" /></td><td><button id="morecol" style="width: 24px">+</button></td></tr></table>`;
 afterEl.after(controlDiv);
 document.querySelector("#morecol").addEventListener("click", () => {
     preventDefault();
@@ -252,3 +273,14 @@ document.querySelector("#movecol").addEventListener("click", () => {
     const toCol = document.querySelector("#tocolumn").value - 1;
     moveColumn(fromCol, toCol);
 });
+document.querySelector("#translatego").addEventListener("click", () => {
+    preventDefault();
+    stopPropagation();
+    const transCol = document.querySelector("#transcol").value;
+    const transJSON = JSON.parse(document.querySelector("#transjson").value);
+    translateColumn(transCol, transJSON);
+});
+// Optional "default" actions for the LGP page
+removeColumn("New");
+removeColumn("Internal ID");
+removeColumn("Final Billed Date");
