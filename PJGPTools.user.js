@@ -3,7 +3,7 @@
 // @namespace   jhutt.com
 // @match       https://1206578.app.netsuite.com/app/common/custom/custrecordentry.nl*
 // @downloadURL https://github.com/Numuruzero/NSTools/raw/refs/heads/main/PJGPTools.user.js
-// @version     1.1
+// @version     1.11
 // ==/UserScript==
 
 const url = window.location.href;
@@ -255,6 +255,7 @@ function createInputDiv() {
       <input type="number" id="stockCosts" placeholder="Stock Costs" />
       <input type="number" id="shippingCosts" placeholder="Shipping Costs" />
       <input type="number" id="installCosts" placeholder="Install Costs" />
+      <p id="finalGrossProfitReason" style="font-size: 11px">NA</p>
     </div>`;
     inputDiv.id = "gpinputdiv";
     prevDiv.after(inputDiv);
@@ -316,9 +317,11 @@ function setGrossProfit(change) {
 
     const finalGPUSDElement = document.querySelector("#finalGrossProfit");
     const finalGPPercentElement = document.querySelector("#finalGrossProfitPercent");
+    const finalGPReasonElement = document.querySelector("#finalGrossProfitReason");
 
     finalGPUSDElement.textContent = finalGPUSD.toFixed(2);
     finalGPPercentElement.textContent = finalGPPercent.toFixed(2);
+    finalGPReasonElement.textContent = `GP calculated expected ship cost. Invoiced cost is $${shippingInput}, GP ${finalGPPercent.toFixed(2)}%`
 }
 
 function setListeners() {
