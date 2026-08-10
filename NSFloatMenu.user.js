@@ -4,7 +4,7 @@
 // @description A floating menu for NetSuite sales orders to quickly add notes and perform actions.
 // @match       https://1206578.app.netsuite.com/app/accounting/transactions/salesord.nl*
 // @require     https://cdn.jsdelivr.net/npm/@violentmonkey/dom@2
-// @version     1.5
+// @version     1.51
 // ==/UserScript==
 
 const url = window.location.href;
@@ -516,9 +516,17 @@ function dragElement(elmnt) {
 
   function closeDragElement() {
     // stop moving when mouse button is released:
+    // Archive for =0 in case this destroys everything
+    // if (
+    //   (parseInt(elmnt.style.left, 10) - lastx === 0 &&
+    //     parseInt(elmnt.style.top, 10) - lasty === 0) ||
+    //   (lastx === 0 && lasty === 0)
+    // ) {
+    //   toggleNoteMenu(); // Close the note menu if no movement
+    // }
     if (
-      (parseInt(elmnt.style.left, 10) - lastx === 0 &&
-        parseInt(elmnt.style.top, 10) - lasty === 0) ||
+      (parseInt(elmnt.style.left, 10) - lastx <= 5 &&
+        parseInt(elmnt.style.top, 10) - lasty <= 5) ||
       (lastx === 0 && lasty === 0)
     ) {
       toggleNoteMenu(); // Close the note menu if no movement
@@ -554,6 +562,8 @@ function submitNote(edit = false) {
   noteFrame.style.top = "0";
   // Make the note frame invisible, unless we want to check on what it's doing
   noteFrame.style.display = "none";
+  // OR
+  // noteFrame.style.display = "block";
   console.log(`Opening comment frame...`)
   document.querySelector("#body").addEventListener("scroll", () => {
     ticker.innerHTML = document.querySelector("#body").scrollTop;
